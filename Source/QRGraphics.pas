@@ -9,6 +9,11 @@ interface
 uses
   Windows, Graphics, DelphiZXingQRCode;
 
+// to make it compatible with Lazarus, add an unit with TMetafile class.
+// E.g., there is \lazarus\components\tachart\TADrawerWMF.pas unit in Lazarus 1.2.6
+// Then find the MakeMetafile() procedure below and delete the line labeled with
+// a comment. It's all
+
 type
   TQRDrawingMode = (drwBitmap, drwRectangles, drwRegion);
 
@@ -103,7 +108,9 @@ begin
   H := QRCode.Rows * Scale + CornerThickness * 2;
   with Metafile do
   try
+// to make it compatible with TADrawerWMF.pas (Lazarus), delete the line below:
     Enhanced := True;
+
     Width := W;
     Height := H;
     M := TMetafileCanvas.Create(Metafile, 0);
