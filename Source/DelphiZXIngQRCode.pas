@@ -433,8 +433,8 @@ type
 
   TECBlocks = class
   private
-    ECCodewordsPerBlock: Integer;
-    ECBlocks: TECBArray;
+    FECCodewordsPerBlock: Integer;
+    FECBlocks: TECBArray;
   public
     constructor Create(ECCodewordsPerBlock: Integer; ECBlocks: TECB); overload;
     constructor Create(ECCodewordsPerBlock: Integer; ECBlocks1,
@@ -448,11 +448,11 @@ type
 
   TVersion = class
   private
-    VersionNumber: Integer;
-    AlignmentPatternCenters: array of Integer;
-    ECBlocks: array of TECBlocks;
-    TotalCodewords: Integer;
-    ECCodewords: Integer;
+    FVersionNumber: Integer;
+    FAlignmentPatternCenters: array of Integer;
+    FECBlocks: array of TECBlocks;
+    FTotalCodewords: Integer;
+    FECCodewords: Integer;
   public
     constructor Create(VersionNumber: Integer; AlignmentPatternCenters:
       array of Integer; ECBlocks1, ECBlocks2, ECBlocks3, ECBlocks4: TECBlocks);
@@ -463,6 +463,8 @@ type
     function GetTotalCodewords: Integer;
     function GetECBlocksForLevel(ECLevel: TErrorCorrectionLevel): TECBlocks;
     function GetDimensionForVersion: Integer;
+
+    property VersionNumber: Integer read FVersionNumber;
   end;
 
   TMatrixUtil = class
@@ -2384,33 +2386,33 @@ var
   ECBArray: TECBArray;
   I: Integer;
 begin
-  Self.VersionNumber := VersionNumber;
-  SetLength(Self.AlignmentPatternCenters, Length(AlignmentPatternCenters));
+  FVersionNumber := VersionNumber;
+  SetLength(FAlignmentPatternCenters, Length(AlignmentPatternCenters));
   if Length(AlignmentPatternCenters) > 0 then
-    Move(AlignmentPatternCenters[0], Self.AlignmentPatternCenters[0],
+    Move(AlignmentPatternCenters[0], FAlignmentPatternCenters[0],
       Length(AlignmentPatternCenters) * SizeOf(Integer));
-  SetLength(ECBlocks, 4);
-  ECBlocks[0] := ECBlocks1;
-  ECBlocks[1] := ECBlocks2;
-  ECBlocks[2] := ECBlocks3;
-  ECBlocks[3] := ECBlocks4;
+  SetLength(FECBlocks, 4);
+  FECBlocks[0] := ECBlocks1;
+  FECBlocks[1] := ECBlocks2;
+  FECBlocks[2] := ECBlocks3;
+  FECBlocks[3] := ECBlocks4;
   Total := 0;
-  ECCodewords := ECBlocks1.GetECCodewordsPerBlock;
+  FECCodewords := ECBlocks1.GetECCodewordsPerBlock;
   ECBArray := ECBlocks1.GetECBlocks;
   for I := 0 to Length(ECBArray) - 1 do
   begin
     ECBlock := ECBArray[I];
-    Inc(Total, ECBlock.Count * (ECBlock.DataCodewords + ECCodewords));
+    Inc(Total, ECBlock.Count * (ECBlock.DataCodewords + FECCodewords));
   end;
-  TotalCodewords := Total;
+  FTotalCodewords := Total;
 end;
 
 destructor TVersion.Destroy;
 var
   X: Integer;
 begin
-  for X := 0 to Length(ECBlocks) - 1 do
-    ECBlocks[X].Free;
+  for X := 0 to Length(FECBlocks) - 1 do
+    FECBlocks[X].Free;
   inherited;
 end;
 
@@ -2422,12 +2424,12 @@ end;
 function TVersion.GetECBlocksForLevel(ECLevel: TErrorCorrectionLevel):
   TECBlocks;
 begin
-  Result := ECBlocks[Ord(ECLevel.Ordinal)];
+  Result := FECBlocks[Ord(ECLevel.Ordinal)];
 end;
 
 function TVersion.GetTotalCodewords: Integer;
 begin
-  Result := TotalCodewords;
+  Result := FTotalCodewords;
 end;
 
 class function TVersion.GetVersionForNumber(VersionNum: Integer): TVersion;
@@ -2689,34 +2691,34 @@ end;
 
 constructor TECBlocks.Create(ECCodewordsPerBlock: Integer; ECBlocks: TECB);
 begin
-  Self.ECCodewordsPerBlock := ECCodewordsPerBlock;
-  SetLength(Self.ECBlocks, 1);
-  Self.ECBlocks[0] := ECBlocks;
+  FECCodewordsPerBlock := ECCodewordsPerBlock;
+  SetLength(FECBlocks, 1);
+  FECBlocks[0] := ECBlocks;
 end;
 
 constructor TECBlocks.Create(ECCodewordsPerBlock: Integer; ECBlocks1,
   ECBlocks2: TECB);
 begin
-  Self.ECCodewordsPerBlock := ECCodewordsPerBlock;
-  SetLength(Self.ECBlocks, 2);
-  ECBlocks[0] := ECBlocks1;
-  ECBlocks[1] := ECBlocks2;
+  FECCodewordsPerBlock := ECCodewordsPerBlock;
+  SetLength(FECBlocks, 2);
+  FECBlocks[0] := ECBlocks1;
+  FECBlocks[1] := ECBlocks2;
 end;
 
 destructor TECBlocks.Destroy;
 begin
-  SetLength(ECBlocks, 0);
+  SetLength(FECBlocks, 0);
   inherited;
 end;
 
 function TECBlocks.GetECBlocks: TECBArray;
 begin
-  Result := ECBlocks;
+  Result := FECBlocks;
 end;
 
 function TECBlocks.GetECCodewordsPerBlock: Integer;
 begin
-  Result := ECCodewordsPerBlock;
+  Result := FECCodewordsPerBlock;
 end;
 
 function TECBlocks.GetNumBlocks: Integer;
@@ -2725,14 +2727,14 @@ var
   I: Integer;
 begin
   Total := 0;
-  for I := 0 to Length(ECBlocks) - 1 do
-    Inc(Total, ECBlocks[I].Count);
+  for I := 0 to Length(FECBlocks) - 1 do
+    Inc(Total, FECBlocks[I].Count);
   Result := Total;
 end;
 
 function TECBlocks.GetTotalECCodewords: Integer;
 begin
-  Result := ECCodewordsPerBlock * GetNumBlocks;
+  Result := FECCodewordsPerBlock * GetNumBlocks;
 end;
 
 { TBlockPair }
