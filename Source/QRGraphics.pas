@@ -7,7 +7,7 @@ unit QRGraphics;
 interface
 
 uses
-  Windows, Graphics, DelphiZXingQRCode, jpeg;
+  Windows, Graphics, DelphiZXingQRCode;
 
 type
   TQRDrawingMode = (drwBitmap, drwRectangles, drwRegion);
