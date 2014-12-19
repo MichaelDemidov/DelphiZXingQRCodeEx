@@ -40,7 +40,7 @@ NB! In both of the vector modes dots have the same width and the same height
     regardless of the value of the Proportional parameter
 }
 procedure DrawQR(ACanvas: TCanvas; ARect: TRect; QRCode: TDelphiZXingQRCode;
-  CornerThickness: Integer = 0; QRDrawingMode: TQRDrawingMode = drwBitmap;
+  CornerThickness: Integer = 0; QRDrawingMode: TQRDrawingMode = drwRegion;
   Proportional: Boolean = True);
 
 {--- create bitmap from QR code ---
@@ -86,12 +86,17 @@ procedure MakeBmp(Bitmap: TBitmap; Scale: Integer;
 begin
   with Bitmap do
   begin
+{$IFNDEF FPC}
+    // there is the well-known bug in Lazarus: TBitmap.SaveToFile raises
+    // an exception ("image palette is too big or absent") when
+    // Monochrome = True
+    if (BColor = clWhite) and (FColor = clBlack) then
+      Monochrome := True;
+{$ENDIF}
     Width := QRCode.Columns * Scale + CornerThickness * 2;
     Height := QRCode.Rows * Scale + CornerThickness * 2;
     Canvas.Brush.Color := BColor;
     Canvas.Pen.Color := FColor;
-    if (BColor = clWhite) and (FColor = clBlack) then
-      Monochrome := True;
     DrawQR(Canvas, Rect(0, 0, Width, Height), QRCode, CornerThickness);
   end;
 end;
@@ -127,7 +132,7 @@ begin
 end;
 
 procedure DrawQR(ACanvas: TCanvas; ARect: TRect; QRCode: TDelphiZXingQRCode;
-  CornerThickness: Integer = 0; QRDrawingMode: TQRDrawingMode = drwBitmap;
+  CornerThickness: Integer = 0; QRDrawingMode: TQRDrawingMode = drwRegion;
   Proportional: Boolean = True);
 var
   W, H, Row, Column, S1, S2: Integer;
@@ -179,6 +184,11 @@ begin
     Bmp := TBitmap.Create;
     with Bmp do
     try
+      if (ACanvas.Brush.Color = clWhite) and
+        (ACanvas.Brush.Style = bsSolid) and
+        (ACanvas.Pen.Color = clBlack) and
+        (ACanvas.Pen.Mode = pmCopy) then
+        Monochrome := True;
       Width := QRCode.Columns;
       Height := QRCode.Rows;
       for Row := 0 to QRCode.Rows - 1 do
@@ -187,12 +197,6 @@ begin
             Canvas.Pixels[Column, Row] := ACanvas.Pen.Color
           else
             Canvas.Pixels[Column, Row] := ACanvas.Brush.Color;
-      if (ACanvas.Brush.Color = clWhite) and
-        (ACanvas.Brush.Style = bsSolid) and
-        (ACanvas.Pen.Color = clBlack) and
-        (ACanvas.Pen.Mode = pmCopy) then
-        Monochrome := True;
-
       if (Width > 0) and (Height > 0) then
         ACanvas.StretchDraw(ARect, Bmp);
     finally
