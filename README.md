@@ -4,7 +4,7 @@ DelphiZXingQRCodeEx
 DelphiZXingQRCodeEx is a Delphi port of the QR Code functionality from ZXing, an open source barcode image processing
 library.
 
-The code initially was ported to Delphi by Senior Debenu Developer, Kevin Newman (project *DelphiZXingQRCode,* see links
+The code was initially ported to Delphi by Senior Debenu Developer, Kevin Newman (project *DelphiZXingQRCode,* see links
 below). Then it was changed by Michael Demidov. The changes are listed in CHANGELOG.md.
 
 **The most fundamental differences are:**
@@ -13,7 +13,7 @@ below). Then it was changed by Michael Demidov. The changes are listed in CHANGE
 2. Support for programmer-defined charsets. As an example, I implemented Win-1251 Russian charset and URL encoding (when
 non-Latin characters are represented as %-codes).
 3. Exception handling has been added. There is no more Access Violation when input string is too long.
-4. New *QRGraphics.pas* unit that contains several functions to draw the QR Code on a given canvas (*TCanvas*) and
+4. New *QRGraphics.pas* unit has been added that contains several functions to draw the QR Code on a given canvas (*TCanvas*) and
 to generate either a bitmap or a metafile.
 5. Still compatible with older versions of Delphi (at least Delphi 7). The DelphiZXIngQRCode.pas and QR_...pas are now
 compatible with Lazarus (1.2.6, for Windows). The QRGraphics.pas is also compatible, but need to fix two lines (see
@@ -35,7 +35,7 @@ The port retains the original Apache License (v2.0).
 
 # Software Requirements #
 
-Delphi 7 or newer (may also work with older verions—I can't test).
+Delphi 7 or newer (I tested with Delphi 7 and XE3).
 
 # Getting Started #
 
