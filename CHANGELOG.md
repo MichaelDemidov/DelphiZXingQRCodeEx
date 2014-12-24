@@ -30,9 +30,7 @@ the recorded one). *TEncoder* class' method *Encode* was upgraded. It now return
 ## 2. Error correction level ##
 
 It actually existed in the original library ZXing, but had been incorrectly ported to Delphi. It is strange that
-after a year the authors have not corrected this bug themselves, although it was known. There is a modified version by
-Christian Budde, where it is fixed (but that source code requires a modern Delphi version, but I needed to have
-a source code that could be compiled in any version, including the old one).
+after a year the authors have not corrected this bug themselves.
 
 1. Property *TDelphiZXingQRCode.ErrorCorrectionOrdinal* has been added. It has the enumerated type related to four
 levels of error correction (L, M, H, Q).

@@ -28,8 +28,6 @@ DelphiZXingQRCodeEx — это набор классов Delphi для гене�
 1. Проект DelphiZXingQRCode
   1. [Проект DelphiZXingQRCode на сайте Debenu](http://www.debenu.com/open-source/delphizxingqrcode-open-source-delphi-qr-code-generator/)
   2. [Проект DelphiZXingQRCode на GitHub](https://github.com/debenu/DelphiZXingQRCode/)
-  3. [Доработанный проект DelphiZXingQRCode на GitHub, автор Christian Budde](https://github.com/CWBudde/DelphiZXingQRCode):
-исправлены ошибки (в частности, исправлен уровень коррекции ошибок), проект переделан под современные версии Delphi (2005 и выше)
 2. ZXing
   1. [Google Code](https://code.google.com/p/zxing/)
   2. [GitHub](https://github.com/zxing/zxing)
