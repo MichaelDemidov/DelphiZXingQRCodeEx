@@ -15,9 +15,8 @@ non-Latin characters are represented as %-codes).
 3. Exception handling has been added. There is no more Access Violation when input string is too long.
 4. New *QRGraphics.pas* unit has been added that contains several functions to draw the QR Code on a given canvas (*TCanvas*) and
 to generate either a bitmap or a metafile.
-5. Still compatible with older versions of Delphi (at least Delphi 7). The DelphiZXIngQRCode.pas and QR_...pas are now
-compatible with Lazarus (1.2.6, for Windows). The QRGraphics.pas is also compatible, but need to fix two lines (see
-in the comments inside the module, what to do)
+5. Still compatible with older versions of Delphi (at least Delphi 7). Compatible with Lazarus (1.2.6, for Windows),
+see CHANGELOG.md (section 5).
 
 The port retains the original Apache License (v2.0).
 

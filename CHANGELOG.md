@@ -50,7 +50,15 @@ refresh the on-screen image.
 2. Methods *BeginUpdate* and *EndUpdate* have been added to temporarily lock QR Code updates when property values
 change.
 
-## 5. Minor bug fixes, refactoring, and other improvements ##
+## 5. Support for Lazarus ##
+
+The main units (*DelphiZXIngQRCode.pas*, *QR_URL.pas*, and *QR_Win1251.pas*) are fully compatible with Lazarus (they have
+been tested with Lazarus 1.2.6 for Windows). The unit *QRGraphics.pas* is mostly compatible. Details see in comments
+inside the unit.
+
+Demo application source for Lazarus included (TestApp\Lazarus-src.zip).
+
+## 6. Minor bug fixes, refactoring, and other improvements ##
 
 * Many refactorings have been done to improve the source code readability. Redundant parentheses after *if* and
 unneeded *begin / end* pairs around single line have been removed, etc.
