@@ -9,8 +9,8 @@ interface
 uses
   Windows, Graphics, DelphiZXingQRCode;
 
-// to make it compatible with Lazarus, add an unit with TMetafile class.
-// E.g., there is \lazarus\components\tachart\TADrawerWMF.pas unit in Lazarus 1.2.6
+// Add an unit with TMetafile class to make it compatible with the Lazarus.
+// E.g. there is \lazarus\components\tachart\TADrawerWMF.pas unit in the Lazarus 1.2.6
 // Then find the MakeMetafile() procedure below and delete the line labeled with
 // a comment. It's all
 
@@ -19,25 +19,25 @@ type
 
 {--- QR code main drawing procedure ---
 
-* ACanvas is the drawing canvas. Some of its properties used:
-  - ACanvas.Brush is the background ("white" dots)
-  - ACanvas.Pen.Color is "black" dots color
+* ACanvas is the drawing canvas:
+  - ACanvas.Brush is the background ("white" dots),
+  - ACanvas.Pen.Color is the foreground ("black" dots) color
 * ARect - bounding rectangle
-* QRCode is TDelphiZXingQRCode object representing QR code
-* CornerThickness is thickness of two perpendicular lines in the lower right
-  corner
-* QRDrawingMode specifies one of three possible modes:
-  1) drwBitmap ("bitmap" mode) creates bitmap wherein each pixel corresponds
+* QRCode is the TDelphiZXingQRCode object representing QR code
+* CornerThickness is the thickness of two perpendicular lines in the lower
+  right corner
+* QRDrawingMode specifies one of these possible modes:
+  1) drwBitmap ("bitmap" mode) creates a bitmap wherein each pixel corresponds
      to a dot of the QR matrix and then scales it to given size
-  2) drwRectangles ("rectangles" vector mode) makes narrow horizontal rectangles
-     ("strips") that represent rows of adjacent dots
-  3) drwRegion ("region" vector mode) creates one complex polygonal region for
-     all black dots (it uses the same rectangles and then combines them)
-* Proportional - if true then entire image is scaled to square and centered
-  inside ARect rectangle
+  2) drwRectangles ("rectangles" vector mode) makes a set of narrow horizontal
+     rectangles ("strips") that represent rows of adjacent dots
+  3) drwRegion ("region" vector mode) creates one complex polygonal region
+     from these rectangles
+* Proportional - if True then the entire image is scaled to square shape and
+  centered inside ARect rectangle
 
-NB! In both of the vector modes dots have the same width and the same height
-    regardless of the value of the Proportional parameter
+NB! In both of the vector modes the dots have the same width and the same
+    height regardless of the Proportional parameter's value
 }
 procedure DrawQR(ACanvas: TCanvas; ARect: TRect; QRCode: TDelphiZXingQRCode;
   CornerThickness: Integer = 0; QRDrawingMode: TQRDrawingMode = drwRegion;
@@ -45,15 +45,15 @@ procedure DrawQR(ACanvas: TCanvas; ARect: TRect; QRCode: TDelphiZXingQRCode;
 
 {--- create bitmap from QR code ---
 
-* Bitmap is TBitmap object to draw in
+* Bitmap is a TBitmap object to draw in
 * Scale is a size of image points (squares)
-* QRCode is TDelphiZXingQRCode object representing QR code
-* BColor is the background ("white" dots) color
-* FColor is is "black" dots color
+* QRCode is a TDelphiZXingQRCode object representing QR code
+* BColor is the background ("white" dots),
+* FColor is the foreground ("black" dots) color
 * CornerThickness is the thickness of two perpendicular lines in the lower right
-  corner
+  corner of the image
 
-See also demo app for an example of saving in JPEG format. There's nothing
+See also demo application for an example of saving in JPEG format. There's nothing
 sophisticated, so I didn't add it here
 }
 procedure MakeBmp(Bitmap: TBitmap; Scale: Integer;
@@ -62,11 +62,11 @@ procedure MakeBmp(Bitmap: TBitmap; Scale: Integer;
 
 {--- create metafile from QR code ---
 
-* Metafile is TMetafile object to draw in
+* Metafile is a TMetafile object to draw in
 * Scale is a size of image points (squares)
-* QRCode is TDelphiZXingQRCode object representing QR code
-* BColor is the background ("white" dots) color
-* FColor is is "black" dots color
+* QRCode is a TDelphiZXingQRCode object representing QR code
+* BColor is the background ("white" dots),
+* FColor is the foreground ("black" dots) color
 * QRDrawingMode is the type of metafile content
 * CornerThickness is the thickness of two perpendicular lines in the lower right
   corner
@@ -113,7 +113,7 @@ begin
   H := QRCode.Rows * Scale + CornerThickness * 2;
   with Metafile do
   try
-// to make it compatible with TADrawerWMF.pas (Lazarus), delete the line below:
+// delete the line below to make it compatible with TADrawerWMF.pas (Lazarus):
     Enhanced := True;
 
     Width := W;

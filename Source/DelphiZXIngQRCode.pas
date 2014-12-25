@@ -42,8 +42,8 @@ const
   ENCODING_UTF8_BOM = 5;
   // - you can add more encodings, e.g. ENCODING_WIN1251 = 6, etc.
   // Synchronously produce TEncoder descendants with overrided ChooseMode,
-  // FilterContent, and AppendBytes methods if needed. See QR_URL.pas and
-  // QR_Win1251.for examples - Michael Demidov
+  // FilterContent, and AppendBytes methods if needed. Examples are given
+  // in the QR_URL.pas and the QR_Win1251.pas - Michael Demidov
 
   // max QR matrix size (not including quiet zone!)
   MAX_MATRIX_SIZE = 177;
