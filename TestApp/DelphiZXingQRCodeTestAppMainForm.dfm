@@ -1,8 +1,8 @@
 object frmMain: TfrmMain
-  Left = 431
-  Top = 312
+  Left = 549
+  Top = 353
   Width = 571
-  Height = 441
+  Height = 500
   Caption = 'Delphi port of ZXing QRCode'
   Color = clBtnFace
   Constraints.MinHeight = 320
@@ -21,7 +21,7 @@ object frmMain: TfrmMain
   TextHeight = 13
   object splTop: TSplitter
     Left = 0
-    Top = 98
+    Top = 119
     Width = 555
     Height = 5
     Cursor = crVSplit
@@ -33,7 +33,7 @@ object frmMain: TfrmMain
     Left = 0
     Top = 0
     Width = 555
-    Height = 98
+    Height = 119
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 8
@@ -55,7 +55,7 @@ object frmMain: TfrmMain
       Left = 8
       Top = 21
       Width = 539
-      Height = 69
+      Height = 90
       Align = alClient
       ScrollBars = ssVertical
       TabOrder = 0
@@ -64,9 +64,9 @@ object frmMain: TfrmMain
   end
   object pnlDetails: TPanel
     Left = 0
-    Top = 103
+    Top = 124
     Width = 555
-    Height = 300
+    Height = 338
     Align = alBottom
     BevelOuter = bvNone
     FullRepaint = False
@@ -124,7 +124,8 @@ object frmMain: TfrmMain
       Width = 265
       Height = 21
       Style = csDropDownList
-      TabOrder = 0
+      ItemHeight = 13
+      TabOrder = 1
       OnChange = cmbEncodingChange
       OnDrawItem = cmbEncodingDrawItem
       OnMeasureItem = cmbEncodingMeasureItem
@@ -143,7 +144,7 @@ object frmMain: TfrmMain
       Top = 80
       Width = 73
       Height = 21
-      TabOrder = 1
+      TabOrder = 2
       Text = '4'
       OnChange = edtQuietZoneChange
     end
@@ -153,7 +154,8 @@ object frmMain: TfrmMain
       Width = 145
       Height = 21
       Style = csDropDownList
-      TabOrder = 3
+      ItemHeight = 13
+      TabOrder = 4
       OnChange = cbbErrorCorrectionLevelChange
       Items.Strings = (
         'L ~7% correction'
@@ -166,7 +168,7 @@ object frmMain: TfrmMain
       Top = 172
       Width = 49
       Height = 21
-      TabOrder = 4
+      TabOrder = 6
       Text = '0'
       OnChange = edtCornerThicknessChange
     end
@@ -176,7 +178,7 @@ object frmMain: TfrmMain
       Width = 16
       Height = 21
       Associate = edtCornerThickness
-      TabOrder = 6
+      TabOrder = 7
     end
     object udQuietZone: TUpDown
       Left = 81
@@ -185,15 +187,15 @@ object frmMain: TfrmMain
       Height = 21
       Associate = edtQuietZone
       Position = 4
-      TabOrder = 2
+      TabOrder = 3
     end
     object grpSaveToFile: TGroupBox
       Left = 8
       Top = 208
       Width = 265
-      Height = 97
-      Caption = '&Save to file'
-      TabOrder = 5
+      Height = 121
+      Caption = '&Save / Copy'
+      TabOrder = 8
       object lblScaleToSave: TLabel
         Left = 8
         Top = 24
@@ -238,6 +240,15 @@ object frmMain: TfrmMain
         Position = 10
         TabOrder = 1
       end
+      object btnCopy: TButton
+        Left = 8
+        Top = 88
+        Width = 249
+        Height = 25
+        Caption = 'C&opy Bitmap to Clipboard'
+        TabOrder = 4
+        OnClick = btnCopyClick
+      end
     end
     object cbbDrawingMode: TComboBox
       Left = 8
@@ -245,7 +256,8 @@ object frmMain: TfrmMain
       Width = 265
       Height = 21
       Style = csDropDownList
-      TabOrder = 7
+      ItemHeight = 13
+      TabOrder = 5
       OnChange = cbbDrawingModeChange
       Items.Strings = (
         'Bitmap proportional'
@@ -261,26 +273,83 @@ object frmMain: TfrmMain
       Width = 233
       Height = 289
       ActivePage = tsPreview
-      TabOrder = 8
+      TabOrder = 0
       object tsPreview: TTabSheet
         Caption = '&Preview'
         object pbPreview: TPaintBox
           Left = 0
           Top = 0
           Width = 225
-          Height = 248
+          Height = 187
           Align = alClient
           OnPaint = pbPreviewPaint
         end
         object lblQRMetrics: TLabel
           Left = 0
-          Top = 248
+          Top = 187
           Width = 225
           Height = 13
           Align = alBottom
           Alignment = taCenter
           Caption = 'lblQRMetrics'
           Transparent = True
+        end
+        object pnlColors: TPanel
+          Left = 0
+          Top = 200
+          Width = 225
+          Height = 61
+          Align = alBottom
+          BevelOuter = bvNone
+          ParentBackground = True
+          ParentColor = True
+          TabOrder = 0
+          object bvlColors: TBevel
+            Left = 0
+            Top = 0
+            Width = 225
+            Height = 9
+            Align = alTop
+            Shape = bsBottomLine
+          end
+          object lblBackground: TLabel
+            Left = 8
+            Top = 16
+            Width = 56
+            Height = 13
+            Caption = '&Background'
+            FocusControl = clrbxBackground
+          end
+          object lblForeground: TLabel
+            Left = 8
+            Top = 40
+            Width = 56
+            Height = 13
+            Caption = '&Foreground'
+            FocusControl = clrbxForeground
+          end
+          object clrbxBackground: TColorBox
+            Left = 80
+            Top = 11
+            Width = 137
+            Height = 22
+            DefaultColorColor = clWhite
+            Selected = clWhite
+            Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames]
+            ItemHeight = 16
+            TabOrder = 0
+            OnChange = clrbxBackgroundChange
+          end
+          object clrbxForeground: TColorBox
+            Left = 80
+            Top = 35
+            Width = 137
+            Height = 22
+            Style = [cbStandardColors, cbExtendedColors, cbCustomColor, cbPrettyNames]
+            ItemHeight = 16
+            TabOrder = 1
+            OnChange = clrbxForegroundChange
+          end
         end
       end
       object tsEncodedData: TTabSheet

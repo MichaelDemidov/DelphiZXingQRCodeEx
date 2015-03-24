@@ -12,8 +12,8 @@ unit DelphiZXingQRCodeTestAppMainForm;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, DelphiZXingQRCode, ExtCtrls, StdCtrls, ComCtrls;
+  Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  DelphiZXingQRCode, ExtCtrls, ComCtrls, StdCtrls;
 
 type
   TfrmMain = class(TForm)
@@ -47,6 +47,13 @@ type
     mmoEncodedData: TMemo;
     lblQRMetrics: TLabel;
     btnSaveToFile: TButton;
+    pnlColors: TPanel;
+    clrbxBackground: TColorBox;
+    lblBackground: TLabel;
+    lblForeground: TLabel;
+    clrbxForeground: TColorBox;
+    bvlColors: TBevel;
+    btnCopy: TButton;
     procedure FormCreate(Sender: TObject);
     procedure mmoTextChange(Sender: TObject);
     procedure cmbEncodingChange(Sender: TObject);
@@ -58,12 +65,15 @@ type
     procedure btnSaveToFileClick(Sender: TObject);
     procedure cbbDrawingModeChange(Sender: TObject);
     procedure cmbEncodingMeasureItem(Control: TWinControl; Index: Integer;
-      var Height: Integer);
+      var AHeight: Integer);
     procedure cmbEncodingDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure pbPreviewPaint(Sender: TObject);
+    procedure clrbxBackgroundChange(Sender: TObject);
+    procedure clrbxForegroundChange(Sender: TObject);
+    procedure btnCopyClick(Sender: TObject);
   private
     FQRCode: TDelphiZXingQRCode;
     // to fix well-known Delphi 7 error with visually vanishing components
@@ -78,7 +88,7 @@ var
 implementation
 
 uses
-  QRGraphics, QR_Win1251, QR_URL, jpeg;
+  QRGraphics, QR_Win1251, QR_URL, jpeg, Clipbrd;
 
 {$R *.dfm}
 
@@ -137,7 +147,22 @@ begin
   pgcQRDetails.Height := pnlDetails.ClientHeight - pgcQRDetails.Top -
     mmoText.Left;
   pgcQRDetails.Anchors := AnchorAlign[alClient];
-  mmoText.Width := ClientWidth - mmoText.Left * 2;
+  lblBackground.Left := lblEncoding.Left;
+  lblForeground.Left := lblEncoding.Left;
+  bvlColors.Height := lblEncoding.Top + 2;
+  clrbxBackground.Top := lblEncoding.Top + bvlColors.Height;
+  clrbxBackground.Width := pnlColors.ClientWidth - clrbxBackground.Left -
+    clrbxBackground.Top;
+  clrbxBackground.Anchors := AnchorAlign[alTop];
+  clrbxForeground.Width := clrbxBackground.Width;
+  clrbxForeground.Anchors := clrbxBackground.Anchors;
+  lblBackground.Top := clrbxBackground.Top + (clrbxBackground.Height -
+    lblBackground.Height) div 2;
+  clrbxForeground.Top := clrbxBackground.BoundsRect.Bottom + lblEncoding.Top;
+  lblForeground.Top := clrbxForeground.Top + (clrbxForeground.Height -
+    lblForeground.Height) div 2;
+  pnlColors.ClientHeight := clrbxForeground.BoundsRect.Bottom + lblEncoding.Top;
+  mmoText.Width := ClientWidth - mmoText.Left * 2 + bvlColors.Height;
   Height := Height + mmoText.Height;
 
   Position := poScreenCenter;
@@ -233,8 +258,8 @@ begin
     if S = '.bmp' then
     try
       Bmp := TBitmap.Create;
-      MakeBmp(Bmp, udScaleToSave.Position, FQRCode, clWhite, clBlack,
-        udCornerThickness.Position);
+      MakeBmp(Bmp, udScaleToSave.Position, FQRCode, clrbxBackground.Selected,
+        clrbxForeground.Selected, udCornerThickness.Position);
       Bmp.SaveToFile(dlgSaveToFile.FileName);
       Bmp.Free;
     except
@@ -245,7 +270,8 @@ begin
       if S = '.emf' then
       try
         M := TMetafile.Create;
-        MakeMetafile(M, udScaleToSave.Position, FQRCode, clWhite, clBlack,
+        MakeMetafile(M, udScaleToSave.Position, FQRCode,
+          clrbxBackground.Selected, clrbxForeground.Selected,
           TQRDrawingMode(cbbDrawingMode.ItemIndex div 2),
           udCornerThickness.Position);
         M.SaveToFile(dlgSaveToFile.FileName);
@@ -258,7 +284,8 @@ begin
         if S = '.jpg' then
         try
           Bmp := TBitmap.Create;
-          MakeBmp(Bmp, udScaleToSave.Position, FQRCode, clWhite, clBlack,
+          MakeBmp(Bmp, udScaleToSave.Position, FQRCode,
+            clrbxBackground.Selected, clrbxForeground.Selected,
             udCornerThickness.Position);
           J := TJPEGImage.Create;
           J.Assign(Bmp);
@@ -281,11 +308,11 @@ begin
 end;
 
 procedure TfrmMain.cmbEncodingMeasureItem(Control: TWinControl;
-  Index: Integer; var Height: Integer);
+  Index: Integer; var AHeight: Integer);
 begin
-  Height := cmbEncoding.ItemHeight;
+  AHeight := cmbEncoding.ItemHeight;
   if Index in [0, ENCODING_UTF8_BOM + 1] then
-    Height := Height * 2;
+    AHeight := AHeight * 2;
 end;
 
 procedure TfrmMain.cmbEncodingDrawItem(Control: TWinControl; Index: Integer;
@@ -369,12 +396,39 @@ procedure TfrmMain.pbPreviewPaint(Sender: TObject);
 begin
   with pbPreview.Canvas do
   begin
-    Pen.Color := clBlack;
-    Brush.Color := clWhite;
+    Pen.Color := clrbxForeground.Selected;
+    Brush.Color := clrbxBackground.Selected;
   end;
   DrawQR(pbPreview.Canvas, pbPreview.ClientRect, FQRCode,
     udCornerThickness.Position, TQRDrawingMode(cbbDrawingMode.ItemIndex div 2),
     Boolean(1 - cbbDrawingMode.ItemIndex mod 2));
+end;
+
+procedure TfrmMain.clrbxBackgroundChange(Sender: TObject);
+begin
+  pbPreview.Repaint
+end;
+
+procedure TfrmMain.clrbxForegroundChange(Sender: TObject);
+begin
+  pbPreview.Repaint
+end;
+
+procedure TfrmMain.btnCopyClick(Sender: TObject);
+var
+  Bmp: TBitmap;
+begin
+  Bmp := nil;
+  try
+    Bmp := TBitmap.Create;
+    MakeBmp(Bmp, udScaleToSave.Position, FQRCode, clrbxBackground.Selected,
+      clrbxForeground.Selected, udCornerThickness.Position);
+    Clipboard.Assign(Bmp);
+    Bmp.Free;
+  except
+    Bmp.Free;
+    raise;
+  end;
 end;
 
 end.
