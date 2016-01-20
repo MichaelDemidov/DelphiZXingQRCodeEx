@@ -1140,7 +1140,7 @@ begin
       CanAdd := (Content[X] >= '0') and (Content[X] <= '9')
     else
     if Mode = qmAlphanumeric then
-      CanAdd := GetAlphanumericCode(Ord(Content[X])) > 0
+      CanAdd := GetAlphanumericCode(Ord(Content[X])) > -1
     else
     if Mode = qmByte then
     begin
