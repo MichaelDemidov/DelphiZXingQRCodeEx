@@ -5,7 +5,7 @@ unit DelphiZXingQRCodeTestAppMainForm;
 // www.debenu.com
 
 // Modifications (well, almost complete remake)
-// © Michael Demidov, 2014
+// © Michael Demidov, 2014—2016
 // http://mik-demidov.blogspot.ru/ (in Russian)
 // e-mail: michael.v.demidov@gmail.com
 
