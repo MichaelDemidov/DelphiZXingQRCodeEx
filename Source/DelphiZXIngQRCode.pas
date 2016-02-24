@@ -4,9 +4,12 @@ unit DelphiZXingQRCode;
 // www.debenu.com
 
 // Some changes by Michael Demidov (see changelog in CHANGELOG.md file)
-// http://mik-demidov.blogspot.ru (the blog available in Russian only, sorry...)
+// http://mik-demidov.blogspot.com (the blog available in Russian only, sorry)
 // e-mail: michael.v.demidov@gmail.com
-//
+
+// GitHub source:
+// https://github.com/MichaelDemidov/DelphiZXingQRCodeEx
+
 // Unchanged Delphi source from Debenu can be found here:
 // https://github.com/debenu/DelphiZXingQRCode/
 
@@ -40,12 +43,12 @@ const
   ENCODING_8BIT = 3;
   ENCODING_UTF8_NOBOM = 4;
   ENCODING_UTF8_BOM = 5;
-  // - you can add more encodings, e.g. ENCODING_WIN1251 = 6, etc.
-  // Synchronously produce TEncoder descendants with overrided ChooseMode,
+  // you can add more encodings, e.g. ENCODING_URL = 6, ENCODING_WIN1251 = 7,
+  // etc. Synchronously produce TEncoder descendants with overrided ChooseMode,
   // FilterContent, and AppendBytes methods if needed. Examples are given
   // in the QR_URL.pas and the QR_Win1251.pas - Michael Demidov
 
-  // max QR matrix size (not including quiet zone!)
+  // max QR matrix width and height (excluding quiet zone!)
   MAX_MATRIX_SIZE = 177;
 
 resourcestring
@@ -297,12 +300,12 @@ const
   QUIET_ZONE_SIZE = 4;
 
   ALPHANUMERIC_TABLE: array[0..95] of Integer = (
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  // 0x00-0x0f
-      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  // 0x10-0x1f
-      36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  // 0x20-0x2f
-      0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1,  // 0x30-0x3f
-      -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // 0x40-0x4f
-      25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1   // 0x50-0x5f
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0x00-0x0f
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0x10-0x1f
+    36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43, // 0x20-0x2f
+    0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1, // 0x30-0x3f
+    -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, // 0x40-0x4f
+    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1  // 0x50-0x5f
   );
 
   DEFAULT_BYTE_MODE_ENCODING = 'ISO-8859-1';
@@ -314,7 +317,8 @@ const
     (1, 0, 1, 1, 1, 0, 1),
     (1, 0, 1, 1, 1, 0, 1),
     (1, 0, 0, 0, 0, 0, 1),
-    (1, 1, 1, 1, 1, 1, 1));
+    (1, 1, 1, 1, 1, 1, 1)
+  );
 
   HORIZONTAL_SEPARATION_PATTERN: array[0..0, 0..7] of Integer = (
     (0, 0, 0, 0, 0, 0, 0, 0));
@@ -327,9 +331,11 @@ const
     (1, 0, 0, 0, 1),
     (1, 0, 1, 0, 1),
     (1, 0, 0, 0, 1),
-    (1, 1, 1, 1, 1));
+    (1, 1, 1, 1, 1)
+  );
 
-  // From Appendix E. Table 1, JIS0510X:2004 (p 71). The table was double-checked by komatsu.
+  // From Appendix E. Table 1, JIS0510X:2004 (p 71). The table was
+  // double-checked by komatsu.
   POSITION_ADJUSTMENT_PATTERN_COORDINATE_TABLE: array[0..39, 0..6] of Integer = (
     (-1, -1, -1, -1,  -1,  -1,  -1),  // Version 1
     ( 6, 18, -1, -1,  -1,  -1,  -1),  // Version 2
@@ -507,6 +513,15 @@ type
       Version, MaskPattern: Integer; Matrix: TByteMatrix);
   end;
 
+// zero-based strings workaround
+{$IFNDEF DCC} // very old Delphi versions and Lazarus
+  {$I StrZero.inc}
+{$ELSE}
+  {$IFNDEF VER240} // Delphi versions earlier than XE3
+    {$I StrZero.inc}
+  {$ENDIF}
+{$ENDIF}
+
 function GetModeCharacterCountBits(Mode: TMode; Version: TVersion): Integer;
 var
   Number: Integer;
@@ -604,8 +619,8 @@ begin
     ApplyMaskPenaltyRule1Internal(Matrix, False);
 end;
 
-// Apply mask penalty rule 2 and return the penalty. Find 2x2 blocks with the same color and give
-// penalty to them.
+// Apply mask penalty rule 2 and return the penalty. Find 2x2 blocks with
+// the same color and give penalty to them.
 function TEncoder.ApplyMaskPenaltyRule2(Matrix: TByteMatrix): Integer;
 var
   Penalty: Integer;
@@ -621,23 +636,19 @@ begin
   Width := Matrix.Width;
   Height := Matrix.Height;
   for Y := 0 to Height - 2 do
-  begin
     for X := 0 to Width - 2 do
     begin
       Value := TheArray[Y][X];
       if (Value = TheArray[Y][X + 1]) and (Value = TheArray[Y + 1][X]) and
         (Value = TheArray[Y + 1][X + 1]) then
-      begin
         Inc(Penalty, 3);
-      end;
     end;
-  end;
   Result := Penalty;
 end;
 
-// Apply mask penalty rule 3 and return the penalty. Find consecutive cells of 00001011101 or
-// 10111010000, and give penalty to them.  If we find patterns like 000010111010000, we give
-// penalties twice (i.e. 40 * 2).
+// Apply mask penalty rule 3 and return the penalty. Find consecutive cells
+// of 00001011101 or 10111010000, and give penalty to them.  If we find patterns
+// like 000010111010000, we give penalties twice (i.e. 40 * 2).
 function TEncoder.ApplyMaskPenaltyRule3(Matrix: TByteMatrix): Integer;
 var
   Penalty: Integer;
@@ -652,7 +663,6 @@ begin
   Width := Matrix.Width;
   Height := Matrix.Height;
   for Y := 0 to Height - 1 do
-  begin
     for X := 0 to Width - 1 do
     begin
       if (X + 6 < Width) and
@@ -673,9 +683,7 @@ begin
                  (TheArray[Y][X -  2] = 0) and
                  (TheArray[Y][X -  3] = 0) and
                  (TheArray[Y][X -  4] = 0))) then
-      begin
         Inc(Penalty, 40);
-      end;
       if (Y + 6 < Height) and
          (TheArray[Y][X] = 1)  and
          (TheArray[Y + 1][X] = 0) and
@@ -694,16 +702,14 @@ begin
                  (TheArray[Y - 2][X] = 0) and
                  (TheArray[Y - 3][X] = 0) and
                  (TheArray[Y - 4][X] = 0))) then
-      begin
         Inc(Penalty, 40);
-      end;
     end;
-  end;
   Result := Penalty;
 end;
 
-// Apply mask penalty rule 4 and return the penalty. Calculate the ratio of dark cells and give
-// penalty if the ratio is far from 50%. It gives 10 penalty for 5% distance. Examples:
+// Apply mask penalty rule 4 and return the penalty. Calculate the ratio of dark
+// cells and give penalty if the ratio is far from 50%. It gives 10 penalty
+// for 5% distance. Examples:
 // -   0% => 100
 // -  40% =>  20
 // -  45% =>  10
@@ -727,22 +733,16 @@ begin
   Width := Matrix.Width;
   Height := matrix.Height;
   for Y := 0 to Height - 1 do
-  begin
     for X := 0 to Width - 1 do
-    begin
       if TheArray[Y][X] = 1 then
-      begin
         Inc(NumDarkCells);
-      end;
-    end;
-  end;
   numTotalCells := matrix.Height * Matrix.Width;
   DarkRatio := NumDarkCells / NumTotalCells;
   Result := Round(Abs((DarkRatio * 100 - 50)) / 50);
 end;
 
-// Helper function for applyMaskPenaltyRule1. We need this for doing this calculation in both
-// vertical and horizontal orders respectively.
+// Helper function for applyMaskPenaltyRule1. We need this for doing this
+// calculation in both vertical and horizontal orders respectively.
 function TEncoder.ApplyMaskPenaltyRule1Internal(Matrix: TByteMatrix;
   IsHorizontal: Boolean): Integer;
 var
@@ -1023,10 +1023,10 @@ begin
   DataBits := TBitArray.Create;
   HeaderBits := TBitArray.Create;
 
-  // Pick an encoding mode appropriate for the content. Note that this will not attempt to use
-  // multiple modes / segments even if that were more efficient. Twould be nice.
-  // Collect data within the main segment, separately, to count its size if needed. Don't add it to
-  // main payload yet.
+  // Pick an encoding mode appropriate for the content. Note that this will not
+  // attempt to use multiple modes / segments even if that were more efficient.
+  // Twould be nice. Collect data within the main segment, separately, to count
+  // its size if needed. Don't add it to main payload yet.
 
   Mode := ChooseMode(Content, EncodeOptions);
   Result := FilterContent(Content, Mode, EncodeOptions);
@@ -1035,9 +1035,9 @@ begin
   // (With ECI in place,) Write the mode marker
   AppendModeInfo(Mode, HeaderBits);
 
-  // Hard part: need to know version to know how many bits length takes. But need to know how many
-  // bits it takes to know version. First we take a guess at version by assuming version will be
-  // the minimum, 1:
+  // Hard part: need to know version to know how many bits length takes. But
+  // need to know how many bits it takes to know version. First we take a guess
+  // at version by assuming version will be the minimum, 1:
   ProvisionalVersion := TVersion.GetVersionForNumber(1);
   try
     ProvisionalBitsNeeded := HeaderBits.GetSize +
@@ -1053,7 +1053,8 @@ begin
     raise EQRMatrixTooLarge.Create(SQRMatrixTooLarge);
 
   try
-    // Use that guess to calculate the right version. I am still not sure this works in 100% of cases.
+    // Use that guess to calculate the right version. I am still not sure this
+    // works in 100% of cases.
     BitsNeeded := HeaderBits.GetSize +
       GetModeCharacterCountBits(Mode, ProvisionalVersion) +
       DataBits.GetSize;
@@ -1129,11 +1130,12 @@ end;
 function TEncoder.FilterContent(const Content: WideString; Mode: TMode;
   EncodeOptions: Integer): WideString;
 var
-  X: Integer;
+  X, L: Integer;
   CanAdd: Boolean;
 begin
   Result := '';
-  for X := 1 to Length(Content) do
+  L := Low(Content);
+  for X := L to Length(Content) + L - 1 do
   begin
     CanAdd := False;
     if Mode = qmNumeric then
@@ -1172,14 +1174,15 @@ var
   AllNumeric: Boolean;
   AllAlphanumeric: Boolean;
   AllISO: Boolean;
-  I: Integer;
+  I, L: Integer;
   C: WideChar;
 begin
+  L := Low(Content);
   if EncodeOptions = 0 then
   begin
     AllNumeric := Length(Content) > 0;
-    I := 1;
-    while (I <= Length(Content)) and (AllNumeric) do
+    I := L;
+    while (I <= Length(Content) + L - 1) and AllNumeric do
     begin
       C := Content[I];
       if (C < '0') or (C > '9') then
@@ -1191,8 +1194,8 @@ begin
     if not AllNumeric then
     begin
       AllAlphanumeric := Length(Content) > 0;
-      I := 1;
-      while (I <= Length(Content)) and (AllAlphanumeric) do
+      I := L;
+      while (I <= Length(Content) + L - 1) and AllAlphanumeric do
       begin
         C := Content[I];
         if GetAlphanumericCode(Ord(C)) < 0 then
@@ -1206,8 +1209,8 @@ begin
     if not AllAlphanumeric then
     begin
       AllISO := Length(Content) > 0;
-      I := 1;
-      while (I <= Length(Content)) and (AllISO) do
+      I := L;
+      while (I <= Length(Content) + L - 1) and AllISO do
       begin
         C := Content[I];
         if Ord(C) > $FF then
@@ -1431,13 +1434,15 @@ begin
     Exit;
   end;
 
-  // Step 1.  Divide data bytes into blocks and generate error correction bytes for them. We'll
-  // store the divided data bytes blocks and error correction bytes blocks into "blocks".
+  // Step 1.  Divide data bytes into blocks and generate error correction bytes
+  // for them. We'll store the divided data bytes blocks and error correction
+  // bytes blocks into "blocks".
   DataBytesOffset := 0;
   MaxNumDataBytes := 0;
   MaxNumEcBytes := 0;
 
-  // Since, we know the number of reedsolmon blocks, we can initialize the vector with the number.
+  // Since, we know the number of reedsolmon blocks, we can initialize
+  // the vector with the number.
   Blocks := TObjectList.Create(True);
   try
     Blocks.Capacity := NumRSBlocks;
@@ -1469,24 +1474,20 @@ begin
 
     // First, place data blocks.
     for I := 0 to MaxNumDataBytes - 1 do
-    begin
       for J := 0 to Blocks.Count - 1 do
       begin
         DataBytes := TBlockPair(Blocks.Items[J]).GetDataBytes;
         if I < Length(DataBytes) then
           Result.AppendBits(DataBytes[I], 8);
       end;
-    end;
     // Then, place error correction blocks.
     for I := 0 to MaxNumECBytes - 1 do
-    begin
       for J := 0 to Blocks.Count - 1 do
       begin
         ECBytes := TBlockPair(Blocks.Items[J]).GetErrorCorrectionBytes;
         if I < Length(ECBytes) then
           Result.AppendBits(ECBytes[I], 8);
       end;
-    end;
   finally
     Blocks.Free;
   end;
@@ -1577,28 +1578,30 @@ procedure TEncoder.AppendNumericBytes(const Content: WideString; Bits:
   TBitArray);
 var
   ContentLength: Integer;
-  I: Integer;
+  I, L: Integer;
   Num1: Integer;
   Num2: Integer;
   Num3: Integer;
 begin
   ContentLength := Length(Content);
   I := 0;
-  while (I < ContentLength) do
+  L := Low(Content);
+  while I < ContentLength + L - 1 do
   begin
-    Num1 := Ord(Content[I + 0 + 1]) - Ord('0');
-    if I + 2 < ContentLength then
+    Num1 := Ord(Content[I + 0 + L]) - Ord('0'); // "I + 0 + L" (and the other
+      // similar things below) is not an error!
+    if I + 1 + L < ContentLength then
     begin
       // Encode three numeric letters in ten bits.
-      Num2 := Ord(Content[I + 1 + 1]) - Ord('0');
-      Num3 := Ord(Content[I + 2 + 1]) - Ord('0');
+      Num2 := Ord(Content[I + 1 + L]) - Ord('0');
+      Num3 := Ord(Content[I + 2 + L]) - Ord('0');
       Bits.AppendBits(Num1 * 100 + Num2 * 10 + Num3, 10);
       Inc(I, 3);
     end else
-    if I + 1 < ContentLength then
+    if I + L < ContentLength then
     begin
       // Encode two numeric letters in seven bits.
-      Num2 := Ord(Content[I + 1 + 1]) - Ord('0');
+      Num2 := Ord(Content[I + 1 + L]) - Ord('0');
       Bits.AppendBits(Num1 * 10 + Num2, 7);
       Inc(I, 2);
     end else
@@ -1614,23 +1617,24 @@ procedure TEncoder.AppendAlphanumericBytes(const Content: WideString; Bits:
   TBitArray);
 var
   ContentLength: Integer;
-  I: Integer;
+  I, L: Integer;
   Code1: Integer;
   Code2: Integer;
 begin
   ContentLength := Length(Content);
   I := 0;
-  while (I < ContentLength) do
+  L := Low(Content);
+  while I < ContentLength + L - 1 do
   begin
-    Code1 := GetAlphanumericCode(Ord(Content[I + 0 + 1]));
+    Code1 := GetAlphanumericCode(Ord(Content[I + 0 + L]));
     if Code1 = -1 then
     begin
       FEncoderError := True;
       Exit;
     end;
-    if I + 1 < ContentLength then
+    if I + L < ContentLength then
     begin
-      Code2 := GetAlphanumericCode(Ord(Content[I + 1 + 1]));
+      Code2 := GetAlphanumericCode(Ord(Content[I + 1 + L]));
       if Code2 = -1 then
       begin
         FEncoderError := True;
@@ -1652,15 +1656,16 @@ procedure TEncoder.Append8BitBytes(const Content: WideString; Bits: TBitArray;
   EncodeOptions: Integer);
 var
   Bytes: TByteArray;
-  I: Integer;
+  I, L: Integer;
   UTF8Version: AnsiString;
 begin
   SetLength(Bytes, 0);
+  L := Low(Content);
   if EncodeOptions = 3 then
   begin
     SetLength(Bytes, Length(Content));
-    for I := 1 to Length(Content) do
-      Bytes[I - 1] := Ord(Content[I]) and $FF;
+    for I := L to Length(Content) + L - 1 do
+      Bytes[I - L] := Ord(Content[I]) and $FF;
   end else
   if EncodeOptions = 4 then
   begin
@@ -1669,7 +1674,7 @@ begin
     SetLength(Bytes, Length(UTF8Version));
 {$WARNINGS OFF}
     if Length(UTF8Version) > 0 then
-      Move(UTF8Version[1], Bytes[0], Length(UTF8Version));
+      Move(UTF8Version[L], Bytes[0], Length(UTF8Version));
 {$WARNINGS ON}
   end else
   if EncodeOptions = 5 then
@@ -1679,7 +1684,7 @@ begin
     SetLength(Bytes, Length(UTF8Version));
 {$WARNINGS OFF}
     if Length(UTF8Version) > 0 then
-      Move(UTF8Version[1], Bytes[0], Length(UTF8Version));
+      Move(UTF8Version[L], Bytes[0], Length(UTF8Version));
 {$WARNINGS ON}
   end;
   for I := 0 to Length(Bytes) - 1 do
@@ -1928,8 +1933,9 @@ begin
   Result := NumDigits;
 end;
 
-// Calculate BCH (Bose-Chaudhuri-Hocquenghem) code for "value" using polynomial "poly". The BCH
-// code is used for encoding type information and version information.
+// Calculate BCH (Bose-Chaudhuri-Hocquenghem) code for "value" using polynomial
+// "poly". The BCH code is used for encoding type information and version
+// information.
 // Example: Calculation of version information of 7.
 // f(x) is created from 7.
 //   - 7 = 000111 in 6 bits
@@ -1951,14 +1957,15 @@ end;
 // Encode it in binary: 110010010100
 // The return value is 0xc94 (1100 1001 0100)
 //
-// Since all coefficients in the polynomials are 1 or 0, we can do the calculation by bit
-// operations. We don't care if cofficients are positive or negative.
+// Since all coefficients in the polynomials are 1 or 0, we can do
+// the calculation by bit operations. We don't care if cofficients are positive
+// or negative.
 function TMatrixUtil.CalculateBCHCode(Value, Poly: Integer): Integer;
 var
   MSBSetInPoly: Integer;
 begin
-  // If poly is "1 1111 0010 0101" (version info poly), msbSetInPoly is 13. We'll subtract 1
-  // from 13 to make it 12.
+  // If poly is "1 1111 0010 0101" (version info poly), msbSetInPoly is 13.
+  // We'll subtract 1 from 13 to make it 12.
   MSBSetInPoly := FindMSBSet(Poly);
   Value := Value shl (MSBSetInPoly - 1);
   // Do the division business using exclusive-or operations.
@@ -1968,8 +1975,8 @@ begin
   Result := Value;
 end;
 
-// Make bit vector of type information. On success, store the result in "bits" and return true.
-// Encode error correction level and mask pattern. See 8.9 of
+// Make bit vector of type information. On success, store the result in "bits"
+// and return true. Encode error correction level and mask pattern. See 8.9 of
 // JISX0510:2004 (p.45) for details.
 procedure TMatrixUtil.MakeTypeInfoBits(ECLevel: TErrorCorrectionLevel;
   MaskPattern: Integer; Bits: TBitArray);
@@ -1999,8 +2006,8 @@ begin
   end;
 end;
 
-// Return the mask bit for "getMaskPattern" at "x" and "y". See 8.8 of JISX0510:2004 for mask
-// pattern conditions.
+// Return the mask bit for "getMaskPattern" at "x" and "y".
+// See 8.8 of JISX0510:2004 for mask pattern conditions.
 function TMatrixUtil.GetDataMaskBit(MaskPattern, X, Y: Integer): Boolean;
 var
   Intermediate: Integer;
@@ -2033,8 +2040,8 @@ begin
   Result := Intermediate = 0;
 end;
 
-// Make bit vector of version information. On success, store the result in "bits" and return true.
-// See 8.10 of JISX0510:2004 (p.45) for details.
+// Make bit vector of version information. On success, store the result
+//in "bits" and return true. See 8.10 of JISX0510:2004 (p.45) for details.
 procedure TMatrixUtil.MakeVersionInfoBits(Version: Integer; Bits: TBitArray);
 var
   BCHCode: Integer;
@@ -2911,7 +2918,8 @@ begin
   CoefficientsLength := Length(ACoefficients);
   if (CoefficientsLength > 1) and (ACoefficients[0] = 0) then
   begin
-    // Leading term must be non-zero for anything except the constant polynomial "0"
+    // Leading term must be non-zero for anything except the constant
+    // polynomial "0"
     FirstNonZero := 1;
     while (FirstNonZero < CoefficientsLength) and
         (ACoefficients[FirstNonZero] = 0) do

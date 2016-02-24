@@ -21,8 +21,8 @@ object frmMain: TfrmMain
   TextHeight = 13
   object splTop: TSplitter
     Left = 0
-    Top = 119
-    Width = 555
+    Top = 126
+    Width = 563
     Height = 5
     Cursor = crVSplit
     Align = alBottom
@@ -32,8 +32,8 @@ object frmMain: TfrmMain
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 555
-    Height = 119
+    Width = 563
+    Height = 126
     Align = alClient
     BevelOuter = bvNone
     BorderWidth = 8
@@ -44,7 +44,7 @@ object frmMain: TfrmMain
     object lblText: TLabel
       Left = 8
       Top = 8
-      Width = 539
+      Width = 547
       Height = 13
       Align = alTop
       Caption = '&Text'
@@ -54,8 +54,8 @@ object frmMain: TfrmMain
     object mmoText: TMemo
       Left = 8
       Top = 21
-      Width = 539
-      Height = 90
+      Width = 547
+      Height = 97
       Align = alClient
       ScrollBars = ssVertical
       TabOrder = 0
@@ -64,8 +64,8 @@ object frmMain: TfrmMain
   end
   object pnlDetails: TPanel
     Left = 0
-    Top = 124
-    Width = 555
+    Top = 131
+    Width = 563
     Height = 338
     Align = alBottom
     BevelOuter = bvNone

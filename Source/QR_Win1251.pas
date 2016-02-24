@@ -1,8 +1,14 @@
 unit QR_Win1251;
 
 // Win-1251 encoder class for TDelphiZXingQRCode
-// © Michael Demidov, 2014
-// http://mik-demidov.blogspot.ru
+// © Michael Demidov, 2014-2015
+// http://mik-demidov.blogspot.com
+
+// GitHub source:
+// https://github.com/MichaelDemidov/DelphiZXingQRCodeEx
+
+// NB! It is Windows-only. To compile under any other OS, replace
+// WideCharToMultiByte() function call
 
 interface
 
@@ -26,10 +32,19 @@ implementation
 uses
   Windows;
 
+// zero-based strings workaround
+{$IFNDEF DCC} // very old Delphi versions and Lazarus
+  {$I StrZero.inc}
+{$ELSE}
+  {$IFNDEF VER240} // Delphi versions earlier than XE3
+    {$I StrZero.inc}
+  {$ENDIF}
+{$ENDIF}
+
 function TWin1251Encoder.FilterContent(const Content: WideString; Mode: TMode;
   EncodeOptions: Integer): WideString;
 var
-  X: Integer;
+  X, L: Integer;
   CanAdd: Boolean;
 
   function Is1251Char(Char: WideChar): Boolean;
@@ -56,7 +71,8 @@ begin
   then
   begin
     Result := '';
-    for X := 1 to Length(Content) do
+    L := Low(Content);
+    for X := L to Length(Content) + L - 1 do
     begin
       CanAdd := (Ord(Content[X]) <= $FF) or Is1251Char(Content[X]);
       if CanAdd then
