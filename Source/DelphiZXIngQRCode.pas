@@ -52,6 +52,11 @@ resourcestring
   // error message for EQRMatrixTooLarge exception
   SQRMatrixTooLarge = 'Trying to store too many bytes';
 
+var
+  // default encoding when property Encoding = ENCODING_AUTO and Data contains
+  // non-ISO chars
+  DefaultNonISOEncoding: Integer = ENCODING_UTF8_NOBOM;
+
 type
   // ----------------- exceptions -----------------
   // too large matrix error
@@ -399,7 +404,6 @@ const
   TYPE_INFO_POLY = $537;
   TYPE_INFO_MASK_PATTERN = $5412;
 
-
   VERSION_DECODE_INFO: array[0..33] of Integer = (
       $07C94, $085BC, $09A99, $0A4D3, $0BBF6,
       $0C762, $0D847, $0E60D, $0F928, $10B78,
@@ -408,6 +412,9 @@ const
       $1B08E, $1CC1A, $1D33F, $1ED75, $1F250,
       $209D5, $216F0, $228BA, $2379F, $24B0B,
       $2542E, $26A64, $27541, $28C69);
+
+  // Byte order mark for UTF-8 encoding
+  BOM = #$EF#$BB#$BF;
 
 const
   ModeCharacterCountBits: array[TMode] of array[0..2] of Integer = (
@@ -1175,7 +1182,7 @@ var
   I: Integer;
   C: WideChar;
 begin
-  if EncodeOptions = 0 then
+  if EncodeOptions = ENCODING_AUTO then
   begin
     AllNumeric := Length(Content) > 0;
     I := 1;
@@ -1227,16 +1234,18 @@ begin
     if AllISO then
     begin
       Result := qmByte;
-      EncodeOptions := 3;
+      EncodeOptions := ENCODING_8BIT;
     end else
     begin
       Result := qmByte;
-      EncodeOptions := 4;
+      EncodeOptions := DefaultNonISOEncoding;
     end;
   end else
     case EncodeOptions of
-      1: Result := qmNumeric;
-      2: Result := qmAlphanumeric;
+      ENCODING_NUMERIC:
+        Result := qmNumeric;
+      ENCODING_ALPHANUMERIC:
+        Result := qmAlphanumeric;
     else
       Result := qmByte;
     end;
@@ -1656,31 +1665,34 @@ var
   UTF8Version: AnsiString;
 begin
   SetLength(Bytes, 0);
-  if EncodeOptions = 3 then
-  begin
-    SetLength(Bytes, Length(Content));
-    for I := 1 to Length(Content) do
-      Bytes[I - 1] := Ord(Content[I]) and $FF;
-  end else
-  if EncodeOptions = 4 then
-  begin
-    // Add the UTF-8 BOM
-    UTF8Version := #$EF#$BB#$BF + UTF8Encode(Content);
-    SetLength(Bytes, Length(UTF8Version));
-{$WARNINGS OFF}
-    if Length(UTF8Version) > 0 then
-      Move(UTF8Version[1], Bytes[0], Length(UTF8Version));
-{$WARNINGS ON}
-  end else
-  if EncodeOptions = 5 then
-  begin
+
+  case EncodeOptions of
+    ENCODING_8BIT:
+      begin
+        SetLength(Bytes, Length(Content));
+        for I := 1 to Length(Content) do
+          Bytes[I - 1] := Ord(Content[I]) and $FF;
+      end;
+    ENCODING_UTF8_NOBOM:
+      begin
     // No BOM
-    UTF8Version := UTF8Encode(Content);
-    SetLength(Bytes, Length(UTF8Version));
+        UTF8Version := UTF8Encode(Content);
+        SetLength(Bytes, Length(UTF8Version));
 {$WARNINGS OFF}
-    if Length(UTF8Version) > 0 then
-      Move(UTF8Version[1], Bytes[0], Length(UTF8Version));
+        if Length(UTF8Version) > 0 then
+          Move(UTF8Version[1], Bytes[0], Length(UTF8Version));
 {$WARNINGS ON}
+      end;
+    ENCODING_UTF8_BOM:
+      begin
+    // Add the UTF-8 BOM
+        UTF8Version := BOM + UTF8Encode(Content);
+        SetLength(Bytes, Length(UTF8Version));
+{$WARNINGS OFF}
+        if Length(UTF8Version) > 0 then
+          Move(UTF8Version[1], Bytes[0], Length(UTF8Version));
+{$WARNINGS ON}
+      end;
   end;
   for I := 0 to Length(Bytes) - 1 do
     Bits.AppendBits(Bytes[I], 8);

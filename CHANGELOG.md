@@ -13,7 +13,7 @@ usually replaced with the % sign and UTF-8 code). Some code changes were made to
 1. *TEncoder* class and everything related has been moved from the *implementation* section of *DelphiZXIngQRCode*
 unit into *interface*.
 2. Three methods of *TEncoder* class (*ChooseMode*, *FilterContent*, *AppendBytes*) have been moved into the
-*protected* section and have become virtual. Now a programmer is able to add his own encoding classes as *TEncoder*
+*protected* section and have become virtual. Now a programmer is able to add their own encoding classes as *TEncoder*
 descendants. The following items in this list are the result of this.
 3. Enumerated type *TQRCodeEncoding* is replaced by a set of integer constants *ENCODING_…* The class
 *TDelphiZXingQRCode* has a new method *RegisterEncoder*. So after creating a *TEncoder* descendant, a programmer
@@ -50,7 +50,15 @@ refresh the on-screen image.
 2. Methods *BeginUpdate* and *EndUpdate* have been added to temporarily lock QR Code updates when property values
 change.
 
-## 5. Support for Lazarus ##
+## 5. New global setting for non-ISO characters ##
+
+The global variable *DefaultNonISOEncoding* is the default encoding for any *TDelphiZXIngQRCode* object when its property
+Encoding = ENCODING_AUTO and the data string contains non-ISO characters.
+
+The default value is ENCODING_UTF8_NOBOM, but the programmer can change this value or even define their own encoding
+with custom *TEncoder* descendant.
+
+## 6. Support for Lazarus ##
 
 The main units (*DelphiZXIngQRCode.pas*, *QR_URL.pas*, and *QR_Win1251.pas*) are fully compatible with Lazarus (they have
 been tested with Lazarus 1.2.6 for Windows). The unit *QRGraphics.pas* is mostly compatible. Details see in comments
@@ -58,7 +66,7 @@ inside the unit.
 
 Demo application source for Lazarus included (TestApp\Lazarus-src.zip).
 
-## 6. Minor bug fixes, refactoring, and other improvements ##
+## 7. Minor bug fixes, refactoring, and other improvements ##
 
 * Many refactorings have been done to improve the source code readability. Redundant parentheses after *if* and
 unneeded *begin / end* pairs around single line have been removed, etc.
@@ -108,7 +116,7 @@ to read them. Useless thing, I think.
 
 * …maybe something else that I forgot.
 
-## 6. Unit *QRGraphics.pas* ##
+## 8. Unit *QRGraphics.pas* ##
 
 In DelphiZXingQRCode there was no code to create an image from the QR Code. Only a demo application could generate a simple bitmap.
 I think that it is not enough.
@@ -118,7 +126,7 @@ a bitmap or a metafile.
 
 A little bonus: there is a code in the demo application that saves the image in JPEG format (see *btnSaveToFile.OnClick* handler).
 
-## 7. Demo application *TestApp* ##
+## 9. Demo application *TestApp* ##
 
 This program is so altered that it can be considered as created from scratch. In fact, it is now possible to use it as
 a standalone application to generate different QR Codes. It also can save the image to BMP, EMF, or JPEG files.
