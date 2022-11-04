@@ -22,12 +22,8 @@ The port retains the original Apache License (v2.0).
 
 # Links #
 
-1. Original DelphiZXingQRCode project
-  1. [Debenu site](http://www.debenu.com/open-source/delphizxingqrcode-open-source-delphi-qr-code-generator/)
-  2. [GitHub Mirror](https://github.com/debenu/DelphiZXingQRCode/)
-2. ZXing
-  1. [Google Code](https://code.google.com/p/zxing/)
-  2. [GitHub](https://github.com/zxing/zxing)
+1. [Original DelphiZXingQRCode GitHub](https://github.com/foxitsoftware/DelphiZXingQRCode)
+2. [ZXing GitHub](https://github.com/zxing/zxing)
 3. [Michael Demidov's blog](http://mik-demidov.blogspot.ru) (in Russian only, sorry)
 
 # Software Requirements #
