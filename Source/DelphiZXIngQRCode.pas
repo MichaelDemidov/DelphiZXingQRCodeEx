@@ -1057,7 +1057,11 @@ begin
   ProvisionalVersion := TVersion.ChooseVersion(ProvisionalBitsNeeded, ECLevel);
 
   if not Assigned(ProvisionalVersion) then
+  begin
+    DataBits.Free;
+    HeaderBits.Free;
     raise EQRMatrixTooLarge.Create(SQRMatrixTooLarge);
+  end;
 
   try
     // Use that guess to calculate the right version. I am still not sure this works in 100% of cases.
@@ -1070,7 +1074,11 @@ begin
   end;
 
   if not Assigned(Version) then
+  begin
+    DataBits.Free;
+    HeaderBits.Free;
     raise EQRMatrixTooLarge.Create(SQRMatrixTooLarge);
+  end;
 
   HeaderAndDataBits := TBitArray.Create;
   FinalBits := TBitArray.Create;
